@@ -53,7 +53,7 @@ Responsibilities:
 
 Relationship:
 
-* A clinic can have multiple branches.
+* A clinic can have multiple offices.
 
 
 ## Dentist

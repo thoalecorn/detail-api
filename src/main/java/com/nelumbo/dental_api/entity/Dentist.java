@@ -29,11 +29,11 @@ public class Dentist {
     @Column(name = "document", nullable = false, length = 20)
     private String document;
 
-    @Column(name = "speciality", nullable = false, length = 100)
-    private String speciality;
+    @Column(name = "specialty", nullable = false, length = 100)
+    private String specialty;
 
-    @Column(name = "creadet_at", nullable = false)
-    private LocalDateTime creadetAt;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
 }   
 

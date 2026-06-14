@@ -21,7 +21,7 @@ public class Patient {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_patients")
+    @Column(name = "id_patient")
     private Long id;
 
     @Column(name = "name", nullable = false, length = 127)
@@ -36,9 +36,9 @@ public class Patient {
     @Column(name = "blocked_until")
     private LocalDateTime blockedUntil;
 
-    @Column(name = "creadet_at", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
-    @Column(name = "update_at")
+    @Column(name = "updated_at")
     private LocalDateTime updateAt;
 }

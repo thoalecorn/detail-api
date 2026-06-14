@@ -25,14 +25,14 @@ public class AppointmentHistory {
     @Column(name = "id_appointment_history")
     private Long id;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "event_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private HistoryEvent historyEvent;
 
     @Column(name = "event_datetime", nullable = false)
     private LocalDateTime eventDatetime;
 
-    @Column(name = "amount_charged", nullable = false)
+    @Column(name = "amount_charged", nullable = false, precision = 10, scale = 2)
     private BigDecimal amountCharged;
 
     @ManyToOne(fetch = FetchType.LAZY)

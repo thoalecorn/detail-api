@@ -1,8 +1,6 @@
 package com.nelumbo.dental_api.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.nelumbo.dental_api.enums.AppointmentStatus;
 
@@ -34,7 +32,7 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
 
-    @Column(name = "procedure_cost", nullable = false)
+    @Column(name = "procedure_cost", nullable = false, precision = 10, scale = 2)
     private BigDecimal procedureCost;
 
     @Column(name = "created_at", nullable = false)
