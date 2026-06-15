@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -19,7 +20,7 @@ public class OfficeController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<OfficeResponse> create(@RequestBody OfficeRequest request) {
+    public ResponseEntity<OfficeResponse> create(@Valid @RequestBody OfficeRequest request) {
         return ResponseEntity.status(201).body(officeService.create(request));
     }
 
@@ -44,7 +45,7 @@ public class OfficeController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OfficeResponse> update(@PathVariable Long id,
-                                                    @RequestBody OfficeRequest request) {
+                                                @Valid @RequestBody OfficeRequest request) {
         return ResponseEntity.ok(officeService.update(id, request));
     }
 

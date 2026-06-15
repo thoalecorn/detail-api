@@ -6,25 +6,26 @@ import com.nelumbo.dental_api.entity.Clinic;
 import com.nelumbo.dental_api.entity.Office;
 import com.nelumbo.dental_api.repository.ClinicRepository;
 import com.nelumbo.dental_api.repository.OfficeRepository;
+import com.nelumbo.dental_api.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OfficeService {
 
     private final OfficeRepository officeRepository;
     private final ClinicRepository clinicRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public OfficeResponse create(OfficeRequest request) {
         Clinic clinic = clinicRepository.findById(request.getClinicId())
-                .orElseThrow(() -> new RuntimeException("Clínica no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Clínica", request.getClinicId()));
 
         Office office = Office.builder()
                 .name(request.getName())
@@ -46,14 +47,14 @@ public class OfficeService {
     @Transactional(readOnly = true)
     public OfficeResponse findById(Long id) {
         Office office = officeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Consultorio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Consultorio", id));
         return toResponse(office);
     }
 
     @Transactional(readOnly = true)
     public List<OfficeResponse> findByClinic(Long clinicId) {
         if (!clinicRepository.existsById(clinicId)) {
-            throw new RuntimeException("Clínica no encontrada");
+            throw new ResourceNotFoundException("Clínica", clinicId);
         }
         return officeRepository.findByClinicId(clinicId)
                 .stream()
@@ -61,13 +62,13 @@ public class OfficeService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public OfficeResponse update(Long id, OfficeRequest request) {
         Office office = officeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Consultorio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Consultorio", id));
 
         Clinic clinic = clinicRepository.findById(request.getClinicId())
-                .orElseThrow(() -> new RuntimeException("Clínica no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Clínica", request.getClinicId()));
 
         office.setName(request.getName());
         office.setCapacity(request.getCapacity());
@@ -76,15 +77,14 @@ public class OfficeService {
         return toResponse(officeRepository.save(office));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public void delete(Long id) {
         if (!officeRepository.existsById(id)) {
-            throw new RuntimeException("Consultorio no encontrado");
+            throw new ResourceNotFoundException("Consultorio", id);
         }
         officeRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
     private OfficeResponse toResponse(Office office) {
         return new OfficeResponse(
                 office.getId(),

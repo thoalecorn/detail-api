@@ -4,6 +4,7 @@ import com.nelumbo.dental_api.dto.clinic.ClinicRequest;
 import com.nelumbo.dental_api.dto.clinic.ClinicResponse;
 import com.nelumbo.dental_api.entity.Clinic;
 import com.nelumbo.dental_api.repository.ClinicRepository;
+import com.nelumbo.dental_api.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,12 +14,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ClinicService {
 
     private final ClinicRepository clinicRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ClinicResponse create(ClinicRequest request) {
         Clinic clinic = Clinic.builder()
                 .name(request.getName())
@@ -37,16 +37,17 @@ public class ClinicService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ClinicResponse findById(Long id) {
         Clinic clinic = clinicRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Clínica no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Clínica", id));
         return toResponse(clinic);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ClinicResponse update(Long id, ClinicRequest request) {
         Clinic clinic = clinicRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Clínica no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Clínica", id));
         clinic.setName(request.getName());
         clinic.setAddress(request.getAddress());
         clinic.setCity(request.getCity());
@@ -54,15 +55,14 @@ public class ClinicService {
         return toResponse(clinicRepository.save(clinic));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public void delete(Long id) {
         if (!clinicRepository.existsById(id)) {
-            throw new RuntimeException("Clínica no encontrada");
+            throw new ResourceNotFoundException("Clínica", id);
         }
         clinicRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
     private ClinicResponse toResponse(Clinic clinic) {
         return new ClinicResponse(
                 clinic.getId(),

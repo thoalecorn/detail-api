@@ -3,6 +3,7 @@ package com.nelumbo.dental_api.controller;
 import com.nelumbo.dental_api.dto.clinic.ClinicRequest;
 import com.nelumbo.dental_api.dto.clinic.ClinicResponse;
 import com.nelumbo.dental_api.service.ClinicService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,10 +20,9 @@ public class ClinicController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ClinicResponse> create(@RequestBody ClinicRequest request) {
+    public ResponseEntity<ClinicResponse> create(@Valid @RequestBody ClinicRequest request) {
         return ResponseEntity.status(201).body(clinicService.create(request));
     }
-
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCIONISTA')")
     public ResponseEntity<List<ClinicResponse>> findAll() {
@@ -38,7 +38,7 @@ public class ClinicController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ClinicResponse> update(@PathVariable Long id,
-                                                @RequestBody ClinicRequest request) {
+                                                @Valid @RequestBody ClinicRequest request) {
         return ResponseEntity.ok(clinicService.update(id, request));
     }
 
