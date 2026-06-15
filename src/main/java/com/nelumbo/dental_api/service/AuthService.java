@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -53,8 +54,8 @@ public class AuthService {
     @Transactional
     public UserResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, 
-                "Ya existe un usuario con ese email");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ya existe un usuario con ese email");
         }
 
         User user = User.builder()
@@ -70,7 +71,7 @@ public class AuthService {
         if (request.getClinicIds() != null && !request.getClinicIds().isEmpty()) {
             for (Long clinicId : request.getClinicIds()) {
                 Clinic clinic = clinicRepository.findById(clinicId)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                 "Clínica no encontrada: " + clinicId));
                 UserClinic userClinic = UserClinic.builder()
                         .user(user)
@@ -83,7 +84,32 @@ public class AuthService {
         return new UserResponse(user.getId(), user.getUsername(),
                 user.getEmail(), user.getRole().name());
     }
+    @Transactional
+    public UserResponse associateClinics(Long userId, List<Long> clinicIds) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+    if (user.getRole() != Role.RECEPCIONISTA) {
+        throw new RuntimeException("Solo se pueden asociar clínicas a recepcionistas");
+    }
+
+    userClinicRepository.deleteByUserId(userId);
+    userClinicRepository.flush();
+
+    for (Long clinicId : clinicIds) {
+        Clinic clinic = clinicRepository.findById(clinicId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Clínica no encontrada: " + clinicId));
+        UserClinic userClinic = UserClinic.builder()
+                .user(user)
+                .clinic(clinic)
+                .build();
+        userClinicRepository.save(userClinic);
+    }
+
+    return new UserResponse(user.getId(), user.getUsername(),
+            user.getEmail(), user.getRole().name());
+}
     public void logout(String token) {
         long expirationMillis = jwtUtil.getExpiration(token).getTime();
         tokenBlacklist.add(token, expirationMillis);

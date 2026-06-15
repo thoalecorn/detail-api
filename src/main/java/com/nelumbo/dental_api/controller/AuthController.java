@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -37,5 +38,12 @@ public class AuthController {
         String token = authHeader.substring(7);
         authService.logout(token);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/users/{id}/clinics")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> associateClinics(@PathVariable Long id,
+                                                        @RequestBody List<Long> clinicIds) {
+        return ResponseEntity.ok(authService.associateClinics(id, clinicIds));
     }
 }
