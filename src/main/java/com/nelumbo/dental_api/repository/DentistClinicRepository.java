@@ -1,7 +1,16 @@
 package com.nelumbo.dental_api.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.nelumbo.dental_api.entity.DentistClinic;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
-public interface DentistClinicRepository extends JpaRepository<DentistClinic, Long>{
+import com.nelumbo.dental_api.entity.DentistClinic;
+import java.util.List;
+
+public interface DentistClinicRepository extends JpaRepository<DentistClinic, Long> {
+    List<DentistClinic> findByDentistId(Long dentistId);
+    
+    @Modifying
+    @Query("DELETE FROM DentistClinic dc WHERE dc.dentist.id = :dentistId")
+    void deleteByDentistId(Long dentistId);
 }
