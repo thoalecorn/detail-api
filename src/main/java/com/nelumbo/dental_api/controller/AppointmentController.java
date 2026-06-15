@@ -1,7 +1,7 @@
 package com.nelumbo.dental_api.controller;
 
 import com.nelumbo.dental_api.dto.appointment.*;
-import com.nelumbo.dental_api.entity.AppointmentHistory;
+import com.nelumbo.dental_api.enums.AppointmentStatus;
 import com.nelumbo.dental_api.service.AppointmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -76,5 +76,12 @@ public class AppointmentController {
     public ResponseEntity<List<AppointmentHistoryResponse>> getHistory(
             @PathVariable Long id) {
         return ResponseEntity.ok(appointmentService.getHistory(id));
+    }
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCIONISTA')")
+    public ResponseEntity<List<AppointmentResponse>> findAll(
+            @RequestParam(required = false) Long clinicId,
+            @RequestParam(required = false) AppointmentStatus status) {
+        return ResponseEntity.ok(appointmentService.findAll(clinicId, status));
     }
 }
