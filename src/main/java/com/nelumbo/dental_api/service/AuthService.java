@@ -15,8 +15,11 @@ import com.nelumbo.dental_api.security.JwtUtil;
 import com.nelumbo.dental_api.security.TokenBlacklist;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -47,9 +50,11 @@ public class AuthService {
         return new LoginResponse(token, expiration);
     }
 
+    @Transactional
     public UserResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Ya existe un usuario con ese email");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, 
+                "Ya existe un usuario con ese email");
         }
 
         User user = User.builder()
@@ -65,7 +70,7 @@ public class AuthService {
         if (request.getClinicIds() != null && !request.getClinicIds().isEmpty()) {
             for (Long clinicId : request.getClinicIds()) {
                 Clinic clinic = clinicRepository.findById(clinicId)
-                        .orElseThrow(() -> new RuntimeException(
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                                 "Clínica no encontrada: " + clinicId));
                 UserClinic userClinic = UserClinic.builder()
                         .user(user)
@@ -80,6 +85,7 @@ public class AuthService {
     }
 
     public void logout(String token) {
-        tokenBlacklist.add(token);
+        long expirationMillis = jwtUtil.getExpiration(token).getTime();
+        tokenBlacklist.add(token, expirationMillis);
     }
 }

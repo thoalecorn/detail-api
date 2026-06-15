@@ -1,19 +1,25 @@
 package com.nelumbo.dental_api.security;
 
 import org.springframework.stereotype.Component;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class TokenBlacklist {
 
-    private final Set<String> blacklistedTokens = new HashSet<>();
+    private final Map<String, Long> blacklistedTokens = new ConcurrentHashMap<>();
 
-    public void add(String token) {
-        blacklistedTokens.add(token);
+    public void add(String token, long expirationMillis) {
+        blacklistedTokens.put(token, expirationMillis);
     }
 
     public boolean isBlacklisted(String token) {
-        return blacklistedTokens.contains(token);
+        Long expiration = blacklistedTokens.get(token);
+        if (expiration == null) return false;
+        if (System.currentTimeMillis() > expiration) {
+            blacklistedTokens.remove(token);
+            return false;
+        }
+        return true;
     }
 }

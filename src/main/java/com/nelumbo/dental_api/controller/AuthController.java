@@ -3,6 +3,7 @@ package com.nelumbo.dental_api.controller;
 import com.nelumbo.dental_api.dto.auth.LoginRequest;
 import com.nelumbo.dental_api.dto.auth.LoginResponse;
 import com.nelumbo.dental_api.service.AuthService;
+
 import com.nelumbo.dental_api.dto.auth.RegisterRequest;
 import com.nelumbo.dental_api.dto.auth.UserResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +31,9 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().build();
+        }
         String token = authHeader.substring(7);
         authService.logout(token);
         return ResponseEntity.noContent().build();
