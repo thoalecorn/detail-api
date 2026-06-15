@@ -40,6 +40,10 @@ public class JwtUtil {
         return getClaims(token).get("role", String.class);
     }
 
+    public Date getExpiration(String token) {
+        return getClaims(token).getExpiration();
+    }
+
     public boolean isTokenValid(String token) {
         try {
             getClaims(token);
