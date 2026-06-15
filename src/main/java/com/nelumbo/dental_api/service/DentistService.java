@@ -5,6 +5,7 @@ import com.nelumbo.dental_api.dto.dentist.DentistResponse;
 import com.nelumbo.dental_api.entity.Clinic;
 import com.nelumbo.dental_api.entity.Dentist;
 import com.nelumbo.dental_api.entity.DentistClinic;
+import com.nelumbo.dental_api.exception.ResourceNotFoundException;
 import com.nelumbo.dental_api.repository.ClinicRepository;
 import com.nelumbo.dental_api.repository.DentistClinicRepository;
 import com.nelumbo.dental_api.repository.DentistRepository;
@@ -49,13 +50,13 @@ public class DentistService {
     @Transactional(readOnly = true)
     public DentistResponse findById(Long id) {
         Dentist dentist = dentistRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Odontólogo no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Odontólogo no encontrado", id));
         return toResponse(dentist);
     }
 
     public DentistResponse update(Long id, DentistRequest request) {
         Dentist dentist = dentistRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Odontólogo no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Odontólogo no encontrado", id));
 
         dentist.setName(request.getName());
         dentist.setDocument(request.getDocument());
@@ -70,7 +71,7 @@ public class DentistService {
 
     public void delete(Long id) {
         if (!dentistRepository.existsById(id)) {
-            throw new RuntimeException("Odontólogo no encontrado");
+            throw new ResourceNotFoundException("Odontólogo no encontrado", id);
         }
         dentistClinicRepository.deleteByDentistId(id);
         dentistRepository.deleteById(id);
@@ -78,7 +79,7 @@ public class DentistService {
 
     public DentistResponse associateClinics(Long dentistId, List<Long> clinicIds) {
         Dentist dentist = dentistRepository.findById(dentistId)
-                .orElseThrow(() -> new RuntimeException("Odontólogo no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Odontólogo no encontrado"));
         dentistClinicRepository.deleteByDentistId(dentistId);
         associateClinics(dentist, clinicIds);
         return toResponse(dentist);
@@ -88,7 +89,7 @@ public class DentistService {
         if (clinicIds == null || clinicIds.isEmpty()) return;
         for (Long clinicId : clinicIds) {
             Clinic clinic = clinicRepository.findById(clinicId)
-                    .orElseThrow(() -> new RuntimeException(
+                    .orElseThrow(() -> new ResourceNotFoundException(
                             "Clínica no encontrada: " + clinicId));
             DentistClinic dentistClinic = DentistClinic.builder()
                     .dentist(dentist)

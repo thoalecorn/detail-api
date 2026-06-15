@@ -3,6 +3,7 @@ package com.nelumbo.dental_api.service;
 import com.nelumbo.dental_api.dto.procedure.ProcedureRequest;
 import com.nelumbo.dental_api.dto.procedure.ProcedureResponse;
 import com.nelumbo.dental_api.entity.Procedure;
+import com.nelumbo.dental_api.exception.ResourceNotFoundException;
 import com.nelumbo.dental_api.repository.ProcedureRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,13 +40,13 @@ public class ProcedureService {
     @Transactional(readOnly = true)
     public ProcedureResponse findById(Long id) {
         Procedure procedure = procedureRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Procedimiento no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Procedimiento no encontrado", id));
         return toResponse(procedure);
     }
 
     public ProcedureResponse update(Long id, ProcedureRequest request) {
         Procedure procedure = procedureRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Procedimiento no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Procedimiento no encontrado", id));
         procedure.setName(request.getName());
         procedure.setDescription(request.getDescription());
         procedure.setCost(request.getCost());
@@ -55,7 +56,7 @@ public class ProcedureService {
 
     public void delete(Long id) {
         if (!procedureRepository.existsById(id)) {
-            throw new RuntimeException("Procedimiento no encontrado");
+            throw new ResourceNotFoundException("Procedimiento no encontrado", id);
         }
         procedureRepository.deleteById(id);
     }
