@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: dental-postgres
+    environment:
+      POSTGRES_DB: dental_db
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dental-network
+
+  dental-api:
+    build: .
+    container_name: dental-api
+    depends_on:
+      - postgres
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/dental_db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      NOTIFICATION_SERVICE_URL: http://notification-service:8081
+    ports:
+      - "8080:8080"
+    networks:
+      - dental-network
+
+  notification-service:
+    build: ../notification-service
+    container_name: notification-service
+    ports:
+      - "8081:8081"
+    networks:
+      - dental-network
+
+volumes:
+  postgres_data:
+
+networks:
+  dental-network:
+    driver: bridge
